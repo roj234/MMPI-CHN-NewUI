@@ -67,12 +67,13 @@ const helloWorld = <div id="main">
 				</div>
 			</div>
 			<div className="explain-box">
-				全新界面由<a href="https://github.com/roj234/">Roj234</a>设计&制作，感谢使用！<br/>
+				全新界面由<a href="https://github.com/roj234/">Roj234 (GitHub)</a>设计&制作，感谢使用！<br/>
 				如果您想深入了解MMPI的原理及专业的使用方式，可以设法阅读
 				<a href="https://baike.baidu.com/item/MMPI-2%E4%B8%AD%E6%96%87%E7%AE%80%E4%BD%93%E5%AD%97%E7%89%88%E4%BD%BF%E7%94%A8%E6%89%8B%E5%86%8C/60347486?fr=aladdin">这本书。</a><br/>
 				数据来源（没有它们就没有这个项目）：<br/>
-				<a href="https://github.com/LLAA178/mmpi2-CN-normals">中国常模来源GitHub项目</a><br/>
-				<a href="https://github.com/MMPI-CHN/MMPI-CHN.github.io">题库和评分标准来源GitHub项目</a>
+				<a href="https://github.com/SHENGYUKing/MMPI_Test">中国常模1982 (GitHub)</a><br/>
+				<a href="https://github.com/LLAA178/mmpi2-CN-normals">中国常模200X (GitHub)</a><br/>
+				<a href="https://github.com/MMPI-CHN/MMPI-CHN.github.io">美国常模 (GitHub)</a>
 			</div>
 			<br/>
 			<div style="display:flex;gap:12px;justify-content:center;">
@@ -86,13 +87,13 @@ const helloWorld = <div id="main">
 							"<br/><br/>" +
 							"2、请认真对待该测验；MMPI是少有的具有完整理论与多年实践的专业（人格）量表，可以帮助您更好地认识自己。需要注意的是，由于该量表常用于临床，因此它主要着眼于您“<b>也许</b>存在的问题”以及“<b>也许</b>拥有的人格特质”。" +
 							"<br/><br/>" +
-							"3、该量表的结果（真的真的）仅供参考；这是因为，虽然本网站根据您的选择计算得到的一致性T分是准确的，但解读可能不够完全。现实中，对该量表做出解释高度依赖于被试的态度、职业，以及一些特殊情景（如近期事件）等；若您希望获得更详细的解答，可以保存我们给出的量表的剖析图，并在日后咨询专业人士。" +
+							"3、该量表的结果仅供参考；<b style='color: red'>心理问题（如抑郁）的原始分通常是偏态分布（大多数人得低分，少数人得高分），而不是本网站代码所假设的正态分布。</b>现实中，对该量表做出解释高度依赖于被试的态度、职业，以及一些特殊情景（如近期事件）等；若您希望获得更详细的解答，可以保存我们给出的分数表格，并在日后咨询专业人士。" +
 							"<br/><br/>" +
 							"4、点击提交测试后，您将得到：一张人格剖析图，以及对应编码型的详尽解析，以及您作答的每个量表维度的简短解析；" +
 							"<br/><br/>" +
 							"5、本测验完全免费，不存在花钱买报告的情况。本项目由三个人开发，如果觉得做得还行，看完剖析图和报告后可以捐点钱给他们买游戏 :D" +
 							"<br/><br/>" +
-							"<b style='color: red'>6、做完第370题（我喜欢聚会等社交活动）后，所有标准量表数据均已收集完成，您可以在此时交卷，或继续作答剩余题目</b>" +
+							"<b style='color: red'>6、做完第370题（我喜欢聚会等社交活动）后，所有临床量表数据均已收集完成，您可以在此时提交，或继续作答附加量表</b>" +
 							"</div>", () => {
 
 							// 写测验开始标记

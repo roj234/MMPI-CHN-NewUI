@@ -1,6 +1,7 @@
 import {therapistArray} from "./data/therapist.js";
 import {treatmentArray} from "./data/treatment.js";
 import {profileArray} from "./data/profile.js";
+import {tScoreCategories} from "./data/data.js";
 import {CategoryScale, Chart, Legend, LinearScale, LineController, LineElement, PointElement, Tooltip} from "chart.js";
 import "./render.css";
 import {formatTimeElapsed, showConfirm} from "../src/utils.js";
@@ -49,10 +50,10 @@ Chart.register([
 	Tooltip, Legend
 ]);
 
-function getTwoPointCode(coreScales) {
+function getTwoPointCode(coreScales, tScoreProp) {
 	const topTwo = coreScales
-		.filter(item => item.tScore > 60)
-		.sort((a, b) => b.tScore - a.tScore)
+		.filter(item => item[tScoreProp] > 60)
+		.sort((a, b) => b[tScoreProp] - a[tScoreProp])
 		.slice(0, 2)
 		.map(item => item.kind); // 纠正索引偏移
 
@@ -74,7 +75,7 @@ function colorTScore(tScore) {
 	return tScore;
 }
 
-function ResultTable(coreScale, coreScaleDescription, otherScales) {
+function ResultTable(tScoreProp, coreScale, coreScaleDescription, otherScales) {
 	const secondScales = [];
 	otherScales = otherScales.filter(item => {
 		if (item.id in otherScaleDescriptions) {
@@ -100,7 +101,7 @@ function ResultTable(coreScale, coreScaleDescription, otherScales) {
 			<table className="data-table">
 				<thead>
 				<tr>
-					<th style={{width: '18%'}}>量表名称</th>
+					<th style={{width: '18%'}}>量表名称<span style="float: right">完成度</span></th>
 					<th style={{width: '70px'}}>T 分<br/>美/中</th>
 					<th style={{width: '70px'}}>原始分</th>
 					<th>临床意义与解释</th>
@@ -121,7 +122,7 @@ function ResultTable(coreScale, coreScaleDescription, otherScales) {
 								<sub>{scale.id}</sub>
 								<sup style={"float:right"}>{(100 * scale.completionRate).toFixed(2)}%</sup>
 							</td>
-							<td>{colorTScore(t)}/{colorTScore(scale.cnTScore)}</td>
+							<td>{colorTScore(t)}/{colorTScore(scale[tScoreProp])}</td>
 							<td>{scale.raw}</td>
 							<td><div className="interpretation-text">{interpretation}</div></td>
 						</tr>
@@ -147,18 +148,21 @@ function downloadFile(str, mimetype, filename) {
 
 export function renderReport(myFullData, answers, timeUsed) {
 	const { coreScales, scales, rins, stats, errors } = myFullData;
-	console.log(myFullData);
 	const allScales = [
 		...rins,
 		...scales
 	];
+
+	console.log(myFullData);
+	const selectedCategoryIndex = 1;
+	const mainScaleCategory = "tScore"+tScoreCategories[selectedCategoryIndex][0];
 
 	if (stats.skip > 22) errors.push("Q(疑问)原始分过高");
 	if (coreScales[1].raw > 10) errors.push("L(装好)原始分过高");
 
 	// 计算编码
 	const profile = coreScales.filter(v => v.kind != null).sort((a, b) => a.kind - b.kind);
-	const [a, b] = getTwoPointCode(profile);
+	const [a, b] = getTwoPointCode(profile, mainScaleCategory);
 
 	const canvas = <canvas></canvas>;
 	const resultWrapper = (
@@ -208,7 +212,7 @@ export function renderReport(myFullData, answers, timeUsed) {
 				</div>
 			</div>
 
-			{ResultTable(coreScales, coreScaleDescriptions, allScales)}
+			{ResultTable(mainScaleCategory, coreScales, coreScaleDescriptions, allScales)}
 		</div>
 	);
 
@@ -216,7 +220,7 @@ export function renderReport(myFullData, answers, timeUsed) {
 	document.body.append(resultWrapper);
 
 	// 渲染图表
-	new Chart(canvas.getContext('2d'), buildChartConfig(coreScales));
+	new Chart(canvas.getContext('2d'), buildChartConfig(selectedCategoryIndex, coreScales));
 }
 
 function erf(x) {
@@ -235,28 +239,34 @@ function calculatePercentile(tScore) {
 	return Math.max(0, Math.min(100, p * 100)).toFixed(2);
 }
 
-function buildChartConfig(coreScales) {
-	const mmpiData = {
-		labels: coreScales.map(val => val.id + "(" + val.translatedName + ")"),
-		datasets: [{
-			label: "百分位 (美国常模)",
-			hidden: true,
-			data: coreScales.map(v => calculatePercentile(v.tScore)),
+function buildChartConfig(selectedScale, coreScales) {
+	const colors = [
+		{
 			borderColor: '#4db8ff',
 			backgroundColor: 'rgba(77, 184, 255, 0.2)',
-			borderWidth: 3,
-		},{
-			label: "百分位 (中国常模)",
-			data: coreScales.map(v => calculatePercentile(v.cnTScore)),
+		},
+		{
 			borderColor: '#22c55e',
 			backgroundColor: 'rgb(34,197,94, 0.2)',
-			borderWidth: 3,
-		}]
-	};
+		},
+		{
+			borderColor: '#c57422',
+			backgroundColor: 'rgb(197,116,34, 0.2)',
+		}
+	];
 
 	return {
 		type: 'line',
-		data: mmpiData,
+		data: {
+			labels: coreScales.map(val => val.id + "(" + val.translatedName + ")"),
+			datasets: tScoreCategories.map(([postfix, name], index) => {return{
+				label: "百分位 ("+name+")",
+				hidden: index !== selectedScale,
+				data: coreScales.map(v => calculatePercentile(v["tScore"+postfix])),
+				borderWidth: 3,
+				...colors[index]
+			}})
+		},
 		options: {
 			responsive: true,
 			scales: {
@@ -303,8 +313,8 @@ function buildChartConfig(coreScales) {
 					padding: 12,
 					callbacks: {
 						label: function(context) {
-							const tScore = coreScales[context.dataIndex][context.datasetIndex?"cnTScore":"tScore"];
-							let label = ` T分数 (${context.datasetIndex?"中":"美"}国常模): ${tScore}`;
+							const tScore = coreScales[context.dataIndex]["tScore"+tScoreCategories[context.datasetIndex][0]];
+							let label = ` T分数 (${tScoreCategories[context.datasetIndex][1]}): ${tScore}`;
 							if (tScore >= 60) label += " (偏高)";
 							if (tScore <= 40) label += " (偏低)";
 							return label;

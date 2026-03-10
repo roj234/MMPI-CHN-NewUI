@@ -276,14 +276,20 @@ export function QuizApp({questions, startTime, submitTime, submit, reset}) {
 					<div className="legend-dot" style="background:var(--light);border:1.5px solid var(--border)"></div>
 					未作答
 				</div>
-				<div className="legend-item">
-					<div className="legend-dot" style="background:#dcfce7;border:1.5px solid var(--success)"></div>
-					正确
-				</div>
-				<div className="legend-item">
-					<div className="legend-dot" style="background:#fee2e2;border:1.5px solid var(--danger)"></div>
-					错误
-				</div>
+				{
+					isFinished ? <>
+						<div className="legend-item">
+							<div className="legend-dot"
+								 style="background:#dcfce7;border:1.5px solid var(--success)"></div>
+							正确
+						</div>
+						<div className="legend-item">
+							<div className="legend-dot"
+								 style="background:#fee2e2;border:1.5px solid var(--danger)"></div>
+							错误
+						</div>
+					</> : null
+				}
 			</div>
 			<div className="widget-actions">
 				<button className="btn btn-ghost" onClick={resetQuiz} disabled={isFinished}>🔄 重新作答</button>

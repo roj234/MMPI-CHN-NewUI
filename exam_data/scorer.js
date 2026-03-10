@@ -1,4 +1,4 @@
-import {rin, scales} from "./data/data.js";
+import {rin, scales, tScoreCategories} from "./data/data.js";
 
 export const MALE = 1, FEMALE = 0;
 
@@ -32,7 +32,7 @@ export function scoreMMPI(gender, answers) {
 		};
 	});
 
-	const calculateTScore = (raw, mean, stddev, isSpecialFemale = false) => {
+	const fromNormalDistribution = (raw, mean, stddev, isSpecialFemale = false) => {
 		let t = isSpecialFemale
 			? -(raw - mean) / stddev * 10 + 50
 			: (raw - mean) / stddev * 10 + 50;
@@ -52,15 +52,13 @@ export function scoreMMPI(gender, answers) {
 		"0": "Si"  // 社会内向 Social Introversion
 	};
 	const coreScales = {};
-	const enCoreScales = {};
 
 	// 计算主量表
 	const scaleResults = scales.map((scale, index) => {
 		const [
 			header,
 			trueList, falseList,
-			tTableMale, tTableFemale,
-			tTableCnMale, tTableCnFemale
+			...tables
 		] = scale;
 
 		// 计算原始分 (Raw Score)
@@ -73,24 +71,41 @@ export function scoreMMPI(gender, answers) {
 		const answeredCount = [...trueList, ...falseList].filter(q => answers[q] === "T" || answers[q] === "F").length;
 
 		// 计算 T 分
-		let tScore = undefined;
-		let kScore = undefined;
-		let cnTScore = undefined;
-
-		const tParams = gender === MALE ? tTableMale : tTableFemale;
-		const cnTParams = gender === MALE ? tTableCnMale : tTableCnFemale;
+		const scores = {};
 		const isMfFemale = header[2] === "Masculinity-Femininity - Female";
+		for (let i = gender === MALE ? 0 : 1; i < tables.length; i += 2) {
+			const tParams = tables[i];
+			if (tParams) {
+				const catId = tScoreCategories[Math.floor(i / 2)][0];
+				let tScore;
 
-		if (cnTParams) cnTScore = calculateTScore(rawScore, cnTParams[0], cnTParams[1], isMfFemale);
+				if (tParams.length === 3) {
+					// Uniform (WIP)
+					const [A, B, C] = tParams;
+					tScore = A + B * rawScore + C * rawScore * rawScore;
+				} else if (tParams.length === 2) {
+					// Mean/Stddev
+					tScore = fromNormalDistribution(rawScore, tParams[0], tParams[1], isMfFemale);
+				} else if (tParams.length === 5) {
+					// Mean/Stddev with K Correction
+					scores["kScore"+catId] = fromNormalDistribution(rawScore, tParams[0], tParams[1]);
 
-		if (tParams) {
-			let score = rawScore;
-			if (tParams[0]) {
-				// K correction
-				score = kScore = Math.floor(coreScales["K"].raw * tParams[0] + rawScore + 0.5);
+					tScore = fromNormalDistribution(rawScore + Math.round(tParams[2] * coreScales["K"].raw), tParams[3], tParams[4]);
+				} else {
+					// Legacy
+
+					let score = rawScore;
+					if (tParams[0]) {
+						// K correction
+						score = Math.floor(coreScales["K"].raw * tParams[0] + rawScore + 0.5);
+						scores["kScore"+catId] = score;
+					}
+
+					tScore = tParams[score + 1];
+				}
+
+				scores["tScore"+catId] = tScore;
 			}
-
-			tScore = tParams[score + 1];
 		}
 
 		if (header[0]?.length === 1) {
@@ -104,9 +119,7 @@ export function scoreMMPI(gender, answers) {
 					translatedName: header[1],
 					name: header[2],
 					raw: rawScore,
-					tScore,
-					kScore,
-					cnTScore,
+					...scores,
 					completionRate: answeredCount / totalPossible,
 				};
 				if (MMPI_MAP[header[0]]) result.kind = parseInt(header[0]);
@@ -120,9 +133,7 @@ export function scoreMMPI(gender, answers) {
 			id: header[1],
 			name: header[2],
 			raw: rawScore,
-			tScore,
-			//kScore,
-			//cnScore,
+			...scores,
 			completionRate: answeredCount / totalPossible
 		};
 	}).filter(x => x);
