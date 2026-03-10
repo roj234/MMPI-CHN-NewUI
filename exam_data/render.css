@@ -1,0 +1,60 @@
+
+
+.report-container {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--gray);
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.report-card {
+    background: var(--white);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 24px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.report-card h2, .report-card h3 {
+    margin: 12px 0;
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+}
+
+.report-card p {
+    line-height: 1.8;
+    color: var(--gray);
+}
+
+/* 表格样式 */
+.data-table {
+    border-spacing: 0;
+}
+
+.data-table th {
+    background: rgba(77, 184, 255, 0.1);
+    color: var(--primary);
+    text-align: left;
+    padding: 12px;
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+/* 高分预警样式 */
+.score-high { color: var(--warning); }
+.score-normal {}
+
+.interpretation-text {
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+}

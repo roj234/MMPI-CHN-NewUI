@@ -1,0 +1,18 @@
+{
+	"name": "mmpi2-chn-roj234",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"unconscious": "^1.6.0",
+		"vite-plugin-singlefile": "^2.3.0"
+	},
+	"dependencies": {
+		"chartjs-plugin-annotation": "^3.1.0"
+	}
+}
